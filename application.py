@@ -30,9 +30,9 @@ engine = create_engine(db_url, echo=True, future=True)
 Session = sessionmaker(bind=engine)
 
 
-# Product object class
-class Product(Base):
-    __tablename__ = 'products'
+# Deal object class
+class Deal(Base):
+    __tablename__ = 'deals'
     id = Column(Integer, primary_key=True)
     title = Column(String)
     url = Column(String)
@@ -46,7 +46,7 @@ class Product(Base):
     favorites = relationship("Favorite", cascade="all, delete-orphan")
 
     def __repr__(self):
-        return "<Product(title='%s', url='%s', categories='%s', price='%f', description='%s', likes='%d', date='%s')>" % (
+        return "<Deal(title='%s', url='%s', categories='%s', price='%f', description='%s', likes='%d', date='%s')>" % (
                 self.title, self.url, self.categories, self.price, self.description, self.likes, self.date)
 
     # Ref: https://stackoverflow.com/questions/5022066/how-to-serialize-sqlalchemy-result-to-json
@@ -71,11 +71,11 @@ class User(Base):
 # Favorite object class
 class Favorite(Base):
     __tablename__ = 'favorites'
-    productId = Column(ForeignKey("products.id"), primary_key=True)
+    dealId = Column(ForeignKey("deals.id"), primary_key=True)
     userName = Column(ForeignKey("user.name"), primary_key=True)
 
     def __repr__(self):
-        return "<Favorite(productId='%d', userName='%d')>" % (self.productId, self.userName)
+        return "<Favorite(dealId='%d', userName='%d')>" % (self.dealId, self.userName)
 
     # Ref: https://stackoverflow.com/questions/5022066/how-to-serialize-sqlalchemy-result-to-json
     def as_dict(self):
@@ -85,32 +85,32 @@ class Favorite(Base):
 Base.metadata.create_all(engine)
 
 
-# Product REST API calls
-@app.route("/products")
-def get_products():
-    app.logger.info("Inside get_products")
+# Deal REST API calls
+@app.route("/deals")
+def get_deals():
+    app.logger.info("Inside get_deals")
     ret_obj = {}
 
     session = Session()
-    products = session.query(Product)
-    product_list = []
-    for product in products:
-        product_dict = {"title": product.title,
-                        "url": product.url,
-                        "categories": product.categories,
-                        "price": product.price,
-                        "description": product.description,
-                        "image": product.img_name,
-                        "likes": product.likes,
-                        "date": product.date}
-        product_list.append(product_dict)
+    deals = session.query(Deal)
+    deal_list = []
+    for deal in deals:
+        deal_dict = {"title": deal.title,
+                        "url": deal.url,
+                        "categories": deal.categories,
+                        "price": deal.price,
+                        "description": deal.description,
+                        "image": deal.img_name,
+                        "likes": deal.likes,
+                        "date": deal.date}
+        deal_list.append(deal_dict)
 
-    ret_obj['products'] = product_list
+    ret_obj['deals'] = deal_list
     return ret_obj
 
-@app.route("/products", methods=['POST'])
-def add_product():
-    app.logger.info("Inside add_product")
+@app.route("/deals", methods=['POST'])
+def add_deal():
+    app.logger.info("Inside add_deal")
 
     title = request.form['titleInput']
     url = request.form['urlInput']
@@ -128,7 +128,7 @@ def add_product():
     likes = 0
     date = datetime.datetime.now()
 
-    product = Product(title=title,
+    deal = Deal(title=title,
                     url=url,
                     categories=categories,
                     price=price,
@@ -139,7 +139,7 @@ def add_product():
                     date=date)
 
     session = Session()
-    session.add(product)
+    session.add(deal)
     session.commit()
 
     return "success!"
