@@ -16,7 +16,7 @@ from jinja2 import Template
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import Column, Integer, Float, ForeignKey, String, DateTime
+from sqlalchemy import Column, Integer, Float, ForeignKey, String, DateTime, LargeBinary, ARRAY
 from sqlalchemy import event
 
 app = Flask(__name__)
@@ -39,7 +39,8 @@ class Product(Base):
     categories = Column(String)
     price = Column(Float)
     description = Column(String)
-    image = Column(String)
+    image = Column(LargeBinary)
+    img_name = Column(String)
     likes = Column(Integer)
     date = Column(DateTime)
     favorites = relationship("Favorite", cascade="all, delete-orphan")
@@ -94,7 +95,15 @@ def get_products():
     products = session.query(Product)
     product_list = []
     for product in products:
-        product_list.append(product.as_dict())
+        product_dict = {"title": product.title,
+                        "url": product.url,
+                        "categories": product.categories,
+                        "price": product.price,
+                        "description": product.description,
+                        "image": product.img_name,
+                        "likes": product.likes,
+                        "date": product.date}
+        product_list.append(product_dict)
 
     ret_obj['products'] = product_list
     return ret_obj
@@ -105,7 +114,7 @@ def add_product():
 
     title = request.form['titleInput']
     url = request.form['urlInput']
-    categories = request.form['categorySelect']
+    categories = ','.join(request.form.getlist('categorySelect'))
     price = float(request.form['priceInput'])
     description = request.form['descriptionInput']
 
@@ -113,7 +122,8 @@ def add_product():
     file = request.files['imageInput']
     if not file:
         return Response("No image uploaded\n", status=400)
-    image = base64.b64encode(file.read()).decode('utf8')
+    image = file.read()
+    img_name = secure_filename(file.filename)
 
     likes = 0
     date = datetime.datetime.now()
@@ -124,6 +134,7 @@ def add_product():
                     price=price,
                     description=description,
                     image=image,
+                    img_name=img_name,
                     likes=likes,
                     date=date)
 
@@ -131,7 +142,7 @@ def add_product():
     session.add(product)
     session.commit()
 
-    return product.as_dict()
+    return "success!"
 
 
 @app.route("/")
