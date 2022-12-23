@@ -63,7 +63,7 @@
     <div class="modal fade add-deal-modal" tabindex="-1" role="dialog" aria-labelledby="addDealModal" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <form method="POST" action="products" enctype="multipart/form-data">
+                <form method="POST" action="add_deal" enctype="multipart/form-data">
                     <div class="modal-header">
                         <h5 class="modal-title">Add Deal</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -115,6 +115,37 @@
     <main>
         <div class="bg-light">
             <div class="container">
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
+                    {% for deal in deals_list %}
+                    <div class="col">
+                        <div class="card shadow-sm my-4">
+                            <img class="card-img-top" src="data:{{deal.img_mimetype}};base64,{{deal.image}}" alt="{{deal.title}}">
+                            <div class="card-body mx-2">
+                                <h3>{{deal.price}}</h3>
+                                <h4>
+                                    <a class="text-dark" href="{{deal.url}}" target="_blank" rel="noopener noreferrer">{{deal.title}}</a>
+                                </h4>
+                                <p class="card-text">{{deal.description}}</p>
+                                <div class="d-flex justify-content-between align-items-center py-2">
+                                    <small class="text-muted">Categories: {{deal.categories}}</small>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center pb-2">
+                                    <div class="d-flex align-items-center">
+                                        <button type="button" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-hand-thumbs-up"></i>
+                                        </button>
+                                        <small class="text-muted pl-2">{{deal.likes}}</small>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-warning">
+                                        <i class="bi bi-star"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted">Posted {{deal.date}}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </main>

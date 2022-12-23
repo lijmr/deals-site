@@ -41,6 +41,7 @@ class Deal(Base):
     description = Column(String)
     image = Column(LargeBinary)
     img_name = Column(String)
+    img_mimetype = Column(String)
     likes = Column(Integer)
     date = Column(DateTime)
     favorites = relationship("Favorite", cascade="all, delete-orphan")
@@ -108,7 +109,7 @@ def get_deals():
     ret_obj['deals'] = deal_list
     return ret_obj
 
-@app.route("/deals", methods=['POST'])
+@app.route("/add_deal", methods=['POST'])
 def add_deal():
     app.logger.info("Inside add_deal")
 
@@ -124,6 +125,7 @@ def add_deal():
         return Response("No image uploaded\n", status=400)
     image = file.read()
     img_name = secure_filename(file.filename)
+    img_mimetype = file.mimetype
 
     likes = 0
     date = datetime.datetime.now()
@@ -135,6 +137,7 @@ def add_deal():
                     description=description,
                     image=image,
                     img_name=img_name,
+                    img_mimetype=img_mimetype,
                     likes=likes,
                     date=date)
 
@@ -142,7 +145,31 @@ def add_deal():
     session.add(deal)
     session.commit()
 
-    return "success!"
+    # Render webpage with new content
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    template_path = os.path.join(BASE_DIR, "templates/deals-site.html")
+
+    fp = open(template_path,"r")
+    contents = fp.read()
+    t = Template(contents)
+
+    deals_list = []
+    deals = session.query(Deal)
+    for deal in deals:
+        deal = {"title": deal.title,
+                    "url": deal.url,
+                    "categories": deal.categories,
+                    "price": "${:0.2f}".format(deal.price),
+                    "description": deal.description,
+                    "image": base64.b64encode(deal.image).decode("ascii"),
+                    "img_mimetype": deal.img_mimetype,
+                    "likes": deal.likes,
+                    "date": deal.date.strftime("%x")}
+        deals_list.append(deal)
+    
+    main_page = t.render(deals_list=deals_list)
+
+    return Response(main_page, status=200)
 
 
 @app.route("/")
