@@ -21,6 +21,12 @@
             font-family: "Playfair Display", Georgia, "Times New Roman", serif;
             font-size: 2.25rem;
         }
+
+        .card-img {
+            width: 100%;
+            height: 13vw;
+            object-fit: contain;
+        }
     </style>
 </head>
 <body>
@@ -43,14 +49,14 @@
     </header>
     
     <!-- Navbar -->
-    <div class="py-1">
-        <nav class="container d-flex flex-column flex-md-row justify-content-between">
+    <div class="py-2">
+        <nav class="container d-flex flex-column flex-md-row justify-content-between align-items-center">
             <a class="py-2 d-none d-md-inline-block text-dark" href="#">Tech</a>
             <a class="py-2 d-none d-md-inline-block text-dark" href="#">Travel</a>
             <a class="py-2 d-none d-md-inline-block text-dark" href="#">Clothing</a>
             <a class="py-2 d-none d-md-inline-block text-dark" href="#">Shoes</a>
             <a class="py-2 d-none d-md-inline-block text-dark" href="#">Grocery</a>
-            <form class="d-flex" role="search">
+            <form class="d-flex my-auto" role="search">
                 <input class="form-control" type="search" placeholder="Search">
                 <button class="btn btn-success" type="submit">
                     <i class="bi bi-search"></i>
@@ -94,6 +100,10 @@
                             <input class="form-control" type="text" id="priceInput" name="priceInput">
                         </div>
                         <div class="form-group">
+                            <label for="storeInput">Store</label>
+                            <input class="form-control" id="storeInput" name="storeInput">
+                        </div>
+                        <div class="form-group">
                             <label for="descriptionInput">Description</label>
                             <textarea class="form-control" id="descriptionInput" name="descriptionInput" rows="3"></textarea>
                         </div>
@@ -119,16 +129,15 @@
                     {% for deal in deals_list %}
                     <div class="col">
                         <div class="card shadow-sm my-4">
-                            <img class="card-img-top" src="data:{{deal.img_mimetype}};base64,{{deal.image}}" alt="{{deal.title}}">
+                            <img class="card-img-top card-img" src="data:{{deal.img_mimetype}};base64,{{deal.image}}" alt="{{deal.title}}">
                             <div class="card-body mx-2">
-                                <h3>{{deal.price}}</h3>
-                                <h4>
-                                    <a class="text-dark" href="{{deal.url}}" target="_blank" rel="noopener noreferrer">{{deal.title}}</a>
-                                </h4>
-                                <p class="card-text">{{deal.description}}</p>
-                                <div class="d-flex justify-content-between align-items-center py-2">
-                                    <small class="text-muted">Categories: {{deal.categories}}</small>
-                                </div>
+                                <h4><b>{{deal.price}}</b></h4>
+                                <p class="text-truncate lead">
+                                    <a class="text-success" href="{{deal.url}}" target="_blank" rel="noopener noreferrer">
+                                        {{deal.title}}
+                                    </a>
+                                </p>
+                                <p class="small text-muted">{{deal.store}}</p>
                                 <div class="d-flex justify-content-between align-items-center pb-2">
                                     <div class="d-flex align-items-center">
                                         <button type="button" class="btn btn-sm btn-outline-primary">
@@ -136,11 +145,8 @@
                                         </button>
                                         <small class="text-muted pl-2">{{deal.likes}}</small>
                                     </div>
-                                    <button type="button" class="btn btn-sm btn-outline-warning">
-                                        <i class="bi bi-star"></i>
-                                    </button>
+                                    <small class="text-muted">Posted {{deal.date}}</small>
                                 </div>
-                                <small class="text-muted">Posted {{deal.date}}</small>
                             </div>
                         </div>
                     </div>

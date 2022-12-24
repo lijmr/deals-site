@@ -38,6 +38,7 @@ class Deal(Base):
     url = Column(String)
     categories = Column(String)
     price = Column(Float)
+    store = Column(String)
     description = Column(String)
     image = Column(LargeBinary)
     img_name = Column(String)
@@ -100,6 +101,7 @@ def get_deals():
                         "url": deal.url,
                         "categories": deal.categories,
                         "price": deal.price,
+                        "store": deal.store,
                         "description": deal.description,
                         "image": deal.img_name,
                         "likes": deal.likes,
@@ -117,6 +119,7 @@ def add_deal():
     url = request.form['urlInput']
     categories = ','.join(request.form.getlist('categorySelect'))
     price = float(request.form['priceInput'])
+    store = request.form['storeInput']
     description = request.form['descriptionInput']
 
     # Convert file to String by encoding image file, then decoding it
@@ -134,6 +137,7 @@ def add_deal():
                     url=url,
                     categories=categories,
                     price=price,
+                    store=store,
                     description=description,
                     image=image,
                     img_name=img_name,
@@ -160,6 +164,7 @@ def add_deal():
                     "url": deal.url,
                     "categories": deal.categories,
                     "price": "${:0.2f}".format(deal.price),
+                    "store": deal.store,
                     "description": deal.description,
                     "image": base64.b64encode(deal.image).decode("ascii"),
                     "img_mimetype": deal.img_mimetype,
@@ -175,7 +180,34 @@ def add_deal():
 @app.route("/")
 def index():
     app.logger.info("Inside index")
-    return render_template('deals-site.html')
+
+    # Render webpage content
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    template_path = os.path.join(BASE_DIR, "templates/deals-site.html")
+
+    fp = open(template_path,"r")
+    contents = fp.read()
+    t = Template(contents)
+
+    deals_list = []
+    session = Session()
+    deals = session.query(Deal)
+    for deal in deals:
+        deal = {"title": deal.title,
+                    "url": deal.url,
+                    "categories": deal.categories,
+                    "price": "${:0.2f}".format(deal.price),
+                    "store": deal.store,
+                    "description": deal.description,
+                    "image": base64.b64encode(deal.image).decode("ascii"),
+                    "img_mimetype": deal.img_mimetype,
+                    "likes": deal.likes,
+                    "date": deal.date.strftime("%x")}
+        deals_list.append(deal)
+    
+    main_page = t.render(deals_list=deals_list)
+
+    return Response(main_page, status=200)
 
 
 # Main method
