@@ -172,7 +172,7 @@ def add_deal():
                     "date": deal.date.strftime("%x")}
         deals_list.append(deal)
     
-    main_page = t.render(deals_list=deals_list)
+    main_page = t.render(deals_list=reversed(deals_list))
 
     return Response(main_page, status=200)
 
@@ -193,7 +193,8 @@ def index():
     session = Session()
     deals = session.query(Deal)
     for deal in deals:
-        deal = {"title": deal.title,
+        deal = {"id": deal.id,
+                    "title": deal.title,
                     "url": deal.url,
                     "categories": deal.categories,
                     "price": "${:0.2f}".format(deal.price),
@@ -205,7 +206,7 @@ def index():
                     "date": deal.date.strftime("%x")}
         deals_list.append(deal)
     
-    main_page = t.render(deals_list=deals_list)
+    main_page = t.render(deals_list=reversed(deals_list))
 
     return Response(main_page, status=200)
 
