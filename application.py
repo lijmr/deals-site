@@ -177,6 +177,50 @@ def add_deal():
     return Response(main_page, status=200)
 
 
+# Favorite REST API calls
+@app.route("/favorites")
+def get_favorites():
+    app.logger.info("Inside get_favorites")
+    ret_obj = {}
+
+    session = Session()
+    favorites = session.query(Favorite)
+    fav_list = []
+    for favorite in favorites:
+        fav_list.append(favorite.as_dict())
+
+    ret_obj['favorite'] = favorites
+    return ret_obj
+
+@app.route("/add_favorite/<id>", methods=['POST'])
+def add_favorite(id):
+    app.logger.info("Inside add_favorite")
+
+    session = Session()
+    deal = session.query(Deal).filter_by(id=id).first()
+
+    if lesson == None:
+        status = ("Deal with id {id} not found.\n").format(id=id)
+        return Response(status, status=404)
+    else:
+        favorite = Favorite(dealId=id, personName=None)
+        session.add(favorite)
+        session.commit()
+
+        fav_list = {}
+        favorites = session.query(Favorite)
+        for favorite in favorites:
+            fav_list.append(favorite.as_dict())
+        
+        ret_obj = {}
+        ret_obj['favorites'] = fav_list
+        return ret_obj
+
+@app.route("/del_favorite/<id>", methods=['DELETE'])
+def del_favorite(id):
+    app.logger.info("Inside del_favorite")
+
+
 @app.route("/")
 def index():
     app.logger.info("Inside index")
